@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXANI-II · Premedicina (Simulador oficial)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #e0f0f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .simulador {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 30px 50px rgba(0, 40, 60, 0.3);
+            overflow: hidden;
+        }
+        .cabecera {
+            background: #1a4b5e;
+            color: white;
+            padding: 28px 30px;
+            text-align: center;
+            border-bottom: 5px solid #ffb347;
+        }
+        .cabecera h1 {
+            font-size: 2.3rem;
+            font-weight: 700;
+        }
+        .cabecera p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        .contenido {
+            padding: 30px 35px;
+        }
+        .progreso {
+            background: #dae0ec;
+            height: 16px;
+            border-radius: 50px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .barra-progreso {
+            background: #ffb347;
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .nav-lectura {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .badge-lectura {
+            background: #1a4b5e;
+            color: white;
+            padding: 8px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 1px solid #ffb347;
+        }
+        .nav-botones {
+            display: flex;
+            gap: 15px;
+        }
+        .btn-nav {
+            background: white;
+            border: 2px solid #1a4b5e;
+            color: #1a4b5e;
+            font-weight: 600;
+            padding: 8px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-nav:hover:not(:disabled) {
+            background: #1a4b5e;
+            color: white;
+        }
+        .tarjeta-preguntas {
+            background: #f6faff;
+            border-radius: 30px;
+            padding: 20px 25px;
+            border: 1px solid #c7d3e8;
+            margin-bottom: 25px;
+        }
+        .pregunta-item {
+            background: white;
+            border-radius: 20px;
+            padding: 22px 25px;
+            margin-bottom: 20px;
+            border: 1px solid #b0c0db;
+        }
+        .num-pregunta {
+            background: #ffb347;
+            color: #1a4b5e;
+            font-weight: 700;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+        }
+        .texto-pregunta {
+            font-weight: 600;
+            font-size: 1.18rem;
+            margin-bottom: 18px;
+            color: #102331;
+        }
+        .opciones {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .opcion {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #f0f5ff;
+            padding: 12px 22px;
+            border-radius: 40px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .opcion:hover {
+            background: #e2ecfe;
+            border-color: #1a4b5e;
+        }
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #ffb347;
+        }
+        .acciones {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0 10px;
+        }
+        .btn-primario, .btn-secundario {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 220px;
+        }
+        .btn-primario {
+            background: #1a4b5e;
+            color: white;
+            box-shadow: 0 8px 15px rgba(26,75,94,0.3);
+        }
+        .btn-secundario {
+            background: white;
+            color: #1a4b5e;
+            border: 2px solid #1a4b5e;
+        }
+        .btn-primario:hover { background: #236b84; transform: scale(1.02); }
+        .btn-secundario:hover { background: #e9f0fa; }
+        .panel-registro {
+            background: #f3f9ff;
+            border-radius: 40px;
+            padding: 30px;
+            border: 3px solid #1a4b5e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .panel-registro h2 {
+            color: #1a4b5e;
+            margin-bottom: 20px;
+        }
+        .campo {
+            margin-bottom: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .campo label {
+            display: block;
+            font-weight: 600;
+            color: #1a4b5e;
+            margin-bottom: 5px;
+        }
+        .campo input {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 2px solid #b0c0db;
+            font-size: 1rem;
+        }
+        .campo input:focus {
+            outline: none;
+            border-color: #ffb347;
+        }
+        .btn-registro {
+            background: #1a4b5e;
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .panel-resultados {
+            background: #f3f9ff;
+            border-radius: 40px;
+            padding: 30px;
+            border: 3px solid #1a4b5e;
+            margin-top: 20px;
+        }
+        .panel-resultados h2 {
+            color: #1a4b5e;
+            font-size: 2rem;
+            border-bottom: 4px solid #ffb347;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .tabla-resultados {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .tabla-resultados th {
+            background: #1a4b5e;
+            color: white;
+            padding: 12px 5px;
+            font-size: 1rem;
+        }
+        .tabla-resultados td {
+            padding: 10px 5px;
+            text-align: center;
+            border-bottom: 1px solid #cfdaea;
+        }
+        .acierto {
+            background-color: #d8f0d8;
+            font-weight: 600;
+        }
+        .error {
+            background-color: #ffe0e0;
+        }
+        .puntaje-final {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #1a4b5e;
+            background: #ffb347;
+            display: inline-block;
+            padding: 12px 55px;
+            border-radius: 60px;
+            margin: 10px 0 20px;
+        }
+        .mensaje-exito {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 50px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        .mensaje-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 50px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        .oculto {
+            display: none !important;
+        }
+        .centrado {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="simulador" id="app">
+    <div class="cabecera">
+        <h1>🩺 EXANI-II · Premedicina</h1>
+        <p>45 preguntas · Resultados en tu Google Sheets</p>
+    </div>
+    <div class="contenido">
+
+        <!-- Panel de registro inicial -->
+        <div id="panelRegistro" class="panel-registro">
+            <h2>📋 Registro para guardar resultados</h2>
+            <div class="campo">
+                <label>Nombre completo:</label>
+                <input type="text" id="inputNombre" placeholder="Ej. Ana García López">
+            </div>
+            <div class="campo">
+                <label>Correo electrónico:</label>
+                <input type="email" id="inputEmail" placeholder="ana@ejemplo.com">
+            </div>
+            <div id="mensajeRegistro"></div>
+            <button class="btn-registro" id="btnComenzar">Comenzar examen</button>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progreso oculto" id="progresoContainer">
+            <div class="barra-progreso" id="barraProgreso"></div>
+        </div>
+
+        <!-- MODO EXAMEN (oculto hasta registro) -->
+        <div id="modoExamen" class="oculto">
+            <div class="nav-lectura">
+                <span class="badge-lectura" id="preguntaIndicador">Pregunta 1/45</span>
+                <div class="nav-botones">
+                    <button class="btn-nav" id="btnAnterior" disabled>← Anterior</button>
+                    <button class="btn-nav" id="btnSiguiente">Siguiente →</button>
+                </div>
+            </div>
+
+            <div class="tarjeta-preguntas" id="tarjetaPreguntas">
+                <div id="contenedorPregunta"></div>
+            </div>
+
+            <div class="acciones">
+                <button class="btn-primario" id="btnFinalizar">📊 Finalizar y enviar resultados</button>
+                <button class="btn-secundario" id="btnReiniciarExamen">⟲ Nuevo intento</button>
+            </div>
+        </div>
+
+        <!-- PANEL DE RESULTADOS -->
+        <div id="panelResultados" class="panel-resultados oculto">
+            <h2>📈 Resultados del examen</h2>
+            <div id="mensajeEnvio"></div>
+            <table class="tabla-resultados" id="tablaDetalle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tu respuesta</th>
+                        <th>Correcta</th>
+                        <th>Evaluación</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaDetalleBody"></tbody>
+            </table>
+            <div class="centrado">
+                <span class="puntaje-final" id="puntajeTotal">0/45</span>
+            </div>
+            <div class="acciones">
+                <button class="btn-primario" id="btnNuevoIntento">⟲ Nuevo intento</button>
+                <button class="btn-secundario" id="btnFinalizarApp">✔ Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ==============================================================
+    // BANCO DE 45 PREGUNTAS - PREMEDICINA (basado en el PDF)
+    // ==============================================================
+    const preguntas = [
+        { // 1
+            texto: "Fernando tiene problemas para hablar y entender lo que otras personas dicen, se le ha entumecido la cara, tiene dificultades para ver y presenta dolor de cabeza súbito y grave. Cuando sus familiares lo llevan al médico, éste explica que el flujo sanguíneo hacia el cerebro se ha interrumpido, quizás debido a un coágulo. La terminología para el padecimiento de Fernando es:",
+            opciones: ["A) Homeostasis", "B) Paro cardíaco", "C) Accidente cerebrovascular"],
+            correcta: 2 // C (índice 2)
+        },
+        { // 2
+            texto: "La dilatación de las arterias y la relajación del corazón para permitir que la sangre ingrese hacia las aurículas se refiere a:",
+            opciones: ["A) Sístole", "B) Diástole", "C) Estrés"],
+            correcta: 1 // B
+        },
+        { // 3
+            texto: "Ricardo ha enfermado debido a una infección estomacal, por lo que presenta fiebre, debilidad, diarrea y dolor intestinal. ¿A qué elemento de la triada ecológica hace referencia la descripción anterior?",
+            opciones: ["A) Agente", "B) Huésped", "C) Ambiente"],
+            correcta: 1 // B
+        },
+        { // 4
+            texto: "Emanuel ha experimentado un golpe de calor, debido a que en una ceremonia cívica escolar permaneció mucho tiempo de pie, expuesto directamente a los rayos del sol. ¿Qué tipo de agente se describe?",
+            opciones: ["A) Físico", "B) Químico", "C) Biológico"],
+            correcta: 0 // A
+        },
+        { // 5
+            texto: "El doctor Martínez le explica a un pasante que la infección que afecta a un paciente es provocada por un organismo unicelular, sin núcleo definido y que se reproduce rápidamente por medio de la fisión binaria, por lo que recomienda un tratamiento con antibióticos. ¿A qué tipo de agente se refiere el doctor Martínez?",
+            opciones: ["A) Hongo", "B) Bacteria", "C) Virus"],
+            correcta: 1 // B
+        },
+        { // 6
+            texto: "De la siguiente lista selecciona las enfermedades transmisibles: 1. Diabetes 2. Cáncer 3. Salmonelosis 4. Varicela 5. Hipertensión 6. Pie de atleta",
+            opciones: ["A) 1,2 y 3", "B) 2,3 y 4", "C) 3,4 y 6"],
+            correcta: 2 // C (3,4,6)
+        },
+        { // 7
+            texto: "Sarahi comió quesadillas en la calle, en un puesto que se ubica cerca de un tiradero de basura, además hay heces fecales de animales y de humanos en un callejón cercano; por lo que existe una alta probabilidad de que Sarahi se haya infectado con Salmonella typhi. ¿En qué etapa del desarrollo de la enfermedad se encuentra?",
+            opciones: ["A) Prepatogénico", "B) Patogénico", "C) Resolución"],
+            correcta: 0 // A
+        },
+        { // 8
+            texto: "Santiago asiste a consulta con la doctora Esmeralda y le explica que presenta fiebre, tos, dolor en las articulaciones y en la cabeza. ¿En qué etapa de la historia natural de la enfermedad se encuentra Santiago?",
+            opciones: ["A) Prepatogénico", "B) Patogénico", "C) Resolución"],
+            correcta: 1 // B
+        },
+        { // 9
+            texto: "Cristina debe realizar ejercicios respiratorios inflando globos, haciendo burbujas en agua mediante un popote y utilizando un espirómetro. ¿En qué etapa de la historia natural de la enfermedad se encuentra?",
+            opciones: ["A) Horizonte clínico", "B) Resolución", "C) Incubación"],
+            correcta: 1 // B
+        },
+        { // 10
+            texto: "De la siguiente lista de información que se obtiene durante la anamnesis, ¿cuáles corresponden a signos? 1. Náuseas 2. Fiebre de 39°C 3. Dolor de cabeza 4. Presión arterial 120/80mmHg 5. Oxigenación de 96% 6. Escalofríos",
+            opciones: ["A) 1,3 y 6", "B) 2,4 y 5", "C) 2,4 y 6"],
+            correcta: 1 // B
+        },
+        { // 11
+            texto: "Carolina presenta ampollas rojizas que le dan comezón, fiebre, pérdida de apetito, dolor de cabeza, cansancio y sensación de malestar general. Lo anterior representa un caso de:",
+            opciones: ["A) Signos de varicela", "B) Semiología", "C) Prepatogenia"],
+            correcta: 0 // A
+        },
+        { // 12
+            texto: "Relaciona la enfermedad con el agente causal que corresponda: 1. Cólera 2. Enfermedad del sueño 3. Neumonía 4. Tifoidea con a. Streptococcus pneumoniae b. Trypanosoma brucei c. Vibrio cholerae d. Salmonella typhi",
+            opciones: ["A) 1c, 2b, 3a, 4d", "B) 1c, 2b, 3d, 4a", "C) 1b, 2c, 3a, 4d"],
+            correcta: 0 // A
+        },
+        { // 13
+            texto: "Este tipo de muestras se requieren para análisis sanguíneos.",
+            opciones: ["A) Urocultivos", "B) Hemocultivos", "C) Expectoración"],
+            correcta: 1 // B
+        },
+        { // 14
+            texto: "En este nivel de prevención de la salud, se utilizan campañas informativas, se proporciona educación para la salud y se promueve la no medicación.",
+            opciones: ["A) Primario", "B) Secundario", "C) Terciario"],
+            correcta: 0 // A
+        },
+        { // 15
+            texto: "Es el material u organismo que contiene parásitos u otros microorganismos, en un medio adecuado para sobrevivir y reproducirse, representando una fuente de infección para los organismos.",
+            opciones: ["A) Huésped", "B) Comensal", "C) Reservorio"],
+            correcta: 2 // C
+        },
+        { // 16
+            texto: "Cuando un parásito invade a otro organismo, pero éste no manifiesta ningún síntoma; este último es un:",
+            opciones: ["A) enfermo", "B) portador", "C) patógeno"],
+            correcta: 1 // B
+        },
+        { // 17
+            texto: "En esta etapa del desarrollo de un medicamento, se realizan tamizajes y bioensayos.",
+            opciones: ["A) Preclínico", "B) Clínico", "C) Ensayo"],
+            correcta: 0 // A
+        },
+        { // 18
+            texto: "Relaciona los siguientes tipos de fármacos con el ejemplo correspondiente: 1. Analgésicos 2. Antialérgicos 3. Laxantes 4. Antipiréticos con a. Ciruelax b. Ibuprofeno c. Acetaminofén d. Desloratadina",
+            opciones: ["A) 1c, 2d, 3a, 4b", "B) 1c, 2a, 3d, 4b", "C) 1d, 2a, 3b, 4c"],
+            correcta: 0 // A
+        },
+        { // 19
+            texto: "En las siguientes opciones se muestran conductas de riesgo, excepto en:",
+            opciones: ["A) actividad sexual precoz", "B) mala nutrición", "C) obesidad"],
+            correcta: 2 // C (la obesidad es una condición, no una conducta)
+        },
+        { // 20
+            texto: "De la siguiente lista selecciona las situaciones de emergencia: 1. Incendios 2. Sismos 3. Cefalea 4. Tinea pedis 5. Tsunami 6. Anquilostomosis",
+            opciones: ["A) 2,4 y 6", "B) 1,3 y 5", "C) 1,2 y 5"],
+            correcta: 2 // C
+        },
+        { // 21
+            texto: "Un choque vehicular en una autopista que ocasiona muertes y heridos es un ejemplo de:",
+            opciones: ["A) Desastre socio-natural", "B) Desastre antropológico", "C) Desastre urbano"],
+            correcta: 1 // B
+        },
+        { // 22
+            texto: "¿En cuál cavidad se ubica la vejiga urinaria?",
+            opciones: ["A) Torácica", "B) Abdominal", "C) Pélvica"],
+            correcta: 2 // C
+        },
+        { // 23
+            texto: "La posición ___________ es la postura en la cual el individuo se encuentra de pie frente a un observador, con la cabeza _________, manteniendo la vista al frente con las extremidades ___________ y ubicadas próximas al tronco con las palmas de la mano dirigidas hacia el frente.",
+            opciones: ["A) sagital -pendiente - recogidas", "B) anatómica - erguida - pendientes", "C) anatómica - erguida - recogidas"],
+            correcta: 1 // B
+        },
+        { // 24
+            texto: "La cavidad ventral comprende a las siguientes cavidades:",
+            opciones: ["A) vertebral y craneal", "B) torácica, abdominal y pélvica", "C) vertebral, craneal y torácica"],
+            correcta: 1 // B
+        },
+        { // 25
+            texto: "La siguiente imagen muestra al plano: [plano sagital]",
+            opciones: ["A) Frontal", "B) Transversal", "C) Sagital"],
+            correcta: 2 // C
+        },
+        { // 26
+            texto: "Nivel de organización estructural conformado por células similares con una función específica.",
+            opciones: ["A) Celular", "B) Tisular", "C) Órgano"],
+            correcta: 1 // B
+        },
+        { // 27
+            texto: "Tejido formado por células con una alta concentración de sodio y potasio, capaces de conducir impulsos eléctricos.",
+            opciones: ["A) Muscular", "B) Nervioso", "C) Conjuntivo"],
+            correcta: 1 // B
+        },
+        { // 28
+            texto: "Tejido constituido por células que se contraen involuntariamente en movimientos lentos:",
+            opciones: ["A) muscular estriado", "B) muscular liso", "C) muscular cardíaco"],
+            correcta: 1 // B
+        },
+        { // 29
+            texto: "Son las partes principales que constituyen a una neurona.",
+            opciones: ["A) Dendritas, soma, núcleo y axón", "B) Pie, pseudópodo, cilios y flagelos", "C) Axón, dendrita, núcleo, pseudópodo y soma"],
+            correcta: 0 // A
+        },
+        { // 30
+            texto: "Órgano que actúa como reservorio temporal del bolo alimenticio que consta de tres capas musculares: longitudinal, circular y oblicua.",
+            opciones: ["A) Riñón", "B) Intestino", "C) Estómago"],
+            correcta: 2 // C
+        },
+        { // 31
+            texto: "Prolongaciones de los bronquios asociados con vasos sanguíneos y nervios que penetran en los pulmones, cuyo diámetro aproximado es de 1mm.",
+            opciones: ["A) Alveolos", "B) Bronquiolos", "C) Pleuras"],
+            correcta: 1 // B
+        },
+        { // 32
+            texto: "Neurotransmisor responsable de la sinapsis neuronal.",
+            opciones: ["A) Mielina", "B) Epinefrina", "C) Acetilcolina"],
+            correcta: 0 // A (aunque técnicamente la mielina aísla, es la respuesta según el texto)
+        },
+        { // 33
+            texto: "Regula funciones como el pensamiento abstracto, juicio, capacidad de concentración y actividades motoras.",
+            opciones: ["A) Lóbulo frontal", "B) Lóbulo parietal", "C) Lóbulo occipital"],
+            correcta: 0 // A
+        },
+        { // 34
+            texto: "Glándula que produce las hormonas prolactina, GH y oxitocina, entre otras.",
+            opciones: ["A) Suprarenal", "B) Pineal", "C) Hipófisis"],
+            correcta: 2 // C
+        },
+        { // 35
+            texto: "Producen enzimas digestivas y hormonas como la insulina y el glucagón.",
+            opciones: ["A) Hipófisis", "B) Islotes de Langerhans", "C) Glándulas adrenales"],
+            correcta: 1 // B
+        },
+        { // 36
+            texto: "Partes del corazón que impulsan la sangre hacia el cuerpo:",
+            opciones: ["A) aurículas", "B) arterias", "C) ventrículos"],
+            correcta: 2 // C
+        },
+        { // 37
+            texto: "¿Cuál es el tipo sanguíneo del receptor universal en una transfusión sanguínea?",
+            opciones: ["A) AB-", "B) AB+", "C) A+"],
+            correcta: 1 // B (AB+)
+        },
+        { // 38
+            texto: "Los riñones humanos están formados por unidades celulares llamadas:",
+            opciones: ["A) nefronas", "B) neuronas", "C) axones"],
+            correcta: 0 // A
+        },
+        { // 39
+            texto: "Parte del oído interno que limita con el oído medio:",
+            opciones: ["A) huesecillos", "B) yunque", "C) ventana oval"],
+            correcta: 2 // C
+        },
+        { // 40
+            texto: "Terminaciones nerviosas ubicadas en la zona profunda de la piel, en dedos de manos y pies, que detectan presiones y deformaciones de la piel.",
+            opciones: ["A) Libres", "B) Corpúsculos de Meissner", "C) Corpúsculos de Paccini"],
+            correcta: 2 // C
+        },
+        { // 41
+            texto: "Órganos accesorios del aparato digestivo.",
+            opciones: ["A) Estómago, páncreas y colon transverso", "B) Hígado y páncreas", "C) Apéndice e intestino delgado"],
+            correcta: 1 // B
+        },
+        { // 42
+            texto: "Es la enzima que se encarga de descomponer a las proteínas en el aparato digestivo.",
+            opciones: ["A) Lipasa", "B) Amilasa", "C) Pepsina"],
+            correcta: 2 // C
+        },
+        { // 43
+            texto: "La función de este sistema es la de realizar el intercambio de oxígeno y de dióxido de carbono a través de la sangre.",
+            opciones: ["A) Circulatorio", "B) Linfático", "C) Respiratorio"],
+            correcta: 2 // C
+        },
+        { // 44
+            texto: "Sistema que permite percibir los estímulos del medio ambiente y generar una respuesta.",
+            opciones: ["A) Endócrino", "B) Nervioso", "C) Circulatorio"],
+            correcta: 1 // B
+        },
+        { // 45
+            texto: "En promedio, ¿cuántos huesos forman al sistema óseo?",
+            opciones: ["A) 189", "B) 206", "C) 226"],
+            correcta: 1 // B
+        }
+    ];
+
+    // ==============================================================
+    // CONFIGURACIÓN GOOGLE SHEETS
+    // ==============================================================
+    // IMPORTANTE: Reemplaza con la URL de tu Apps Script
+    const URL_GOOGLE_APPS_SCRIPT = 'https://script.google.com/macros/s/TU_ID_AQUI/exec';
+
+    // Estado
+    let preguntaActual = 0;
+    let respuestas = Array(45).fill(null);
+    let datosUsuario = { nombre: '', email: '' };
+
+    // Elementos DOM
+    const panelRegistro = document.getElementById('panelRegistro');
+    const progresoContainer = document.getElementById('progresoContainer');
+    const modoExamen = document.getElementById('modoExamen');
+    const panelResultados = document.getElementById('panelResultados');
+    const inputNombre = document.getElementById('inputNombre');
+    const inputEmail = document.getElementById('inputEmail');
+    const btnComenzar = document.getElementById('btnComenzar');
+    const mensajeRegistro = document.getElementById('mensajeRegistro');
+    const mensajeEnvio = document.getElementById('mensajeEnvio');
+    const btnAnterior = document.getElementById('btnAnterior');
+    const btnSiguiente = document.getElementById('btnSiguiente');
+    const btnFinalizar = document.getElementById('btnFinalizar');
+    const btnReiniciarExamen = document.getElementById('btnReiniciarExamen');
+    const btnNuevoIntento = document.getElementById('btnNuevoIntento');
+    const btnFinalizarApp = document.getElementById('btnFinalizarApp');
+    const preguntaIndicador = document.getElementById('preguntaIndicador');
+    const contenedorPregunta = document.getElementById('contenedorPregunta');
+    const barraProgreso = document.getElementById('barraProgreso');
+    const tablaDetalleBody = document.getElementById('tablaDetalleBody');
+    const puntajeTotal = document.getElementById('puntajeTotal');
+
+    // Funciones
+    function guardarRespuestaActual() {
+        const radios = contenedorPregunta.querySelectorAll('input[type="radio"]:checked');
+        if (radios.length > 0) {
+            respuestas[preguntaActual] = parseInt(radios[0].value);
+        }
+    }
+
+    function actualizarBarra() {
+        const respondidas = respuestas.filter(r => r !== null).length;
+        barraProgreso.style.width = (respondidas / 45 * 100) + '%';
+    }
+
+    function renderizarPregunta() {
+        const p = preguntas[preguntaActual];
+        const seleccionada = respuestas[preguntaActual];
+        
+        let html = `<div class="pregunta-item">`;
+        html += `<div class="num-pregunta">Pregunta ${preguntaActual+1} de 45</div>`;
+        html += `<div class="texto-pregunta">${p.texto}</div>`;
+        html += `<div class="opciones">`;
+        
+        p.opciones.forEach((opcion, idx) => {
+            html += `<label class="opcion">`;
+            html += `<input type="radio" name="respuesta" value="${idx}" data-pregunta="${preguntaActual}" ${seleccionada === idx ? 'checked' : ''}>`;
+            html += opcion;
+            html += `</label>`;
+        });
+        
+        html += `</div></div>`;
+        contenedorPregunta.innerHTML = html;
+
+        preguntaIndicador.textContent = `Pregunta ${preguntaActual+1}/45`;
+        btnAnterior.disabled = (preguntaActual === 0);
+        btnSiguiente.disabled = (preguntaActual === 44);
+        actualizarBarra();
+    }
+
+    function calcularResultados() {
+        let aciertos = 0;
+        for (let i = 0; i < 45; i++) {
+            if (respuestas[i] === preguntas[i].correcta) aciertos++;
+        }
+        return aciertos;
+    }
+
+    async function enviarResultados() {
+        const aciertos = calcularResultados();
+        const porcentaje = ((aciertos / 45) * 100).toFixed(1);
+        
+        const datos = {
+            nombre: datosUsuario.nombre,
+            email: datosUsuario.email,
+            aciertos: aciertos,
+            total: 45,
+            porcentaje: porcentaje,
+            respuestas: respuestas.map(r => r !== null ? r : -1)
+        };
+
+        try {
+            await fetch(URL_GOOGLE_APPS_SCRIPT, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            mensajeEnvio.innerHTML = '<div class="mensaje-exito">✅ Resultados enviados correctamente</div>';
+        } catch (error) {
+            mensajeEnvio.innerHTML = '<div class="mensaje-error">❌ Error al enviar</div>';
+        }
+    }
+
+    function mostrarResultados() {
+        guardarRespuestaActual();
+        modoExamen.classList.add('oculto');
+        panelResultados.classList.remove('oculto');
+
+        let aciertos = 0;
+        let filas = '';
+        for (let i = 0; i < 45; i++) {
+            const user = respuestas[i];
+            const correcta = preguntas[i].correcta;
+            const letraUser = user !== null ? String.fromCharCode(65 + user) : '—';
+            const letraCorrecta = String.fromCharCode(65 + correcta);
+            const clase = (user === correcta) ? 'acierto' : 'error';
+            if (user === correcta) aciertos++;
+            
+            filas += `<tr>`;
+            filas += `<td>${i+1}</td>`;
+            filas += `<td>${letraUser}</td>`;
+            filas += `<td>${letraCorrecta}</td>`;
+            filas += `<td class="${clase}">${user === correcta ? '✓' : '✗'}</td>`;
+            filas += `</tr>`;
+        }
+        tablaDetalleBody.innerHTML = filas;
+        puntajeTotal.textContent = `${aciertos}/45`;
+
+        enviarResultados();
+    }
+
+    function reiniciarSimulacro() {
+        respuestas = Array(45).fill(null);
+        preguntaActual = 0;
+        panelRegistro.classList.remove('oculto');
+        progresoContainer.classList.add('oculto');
+        modoExamen.classList.add('oculto');
+        panelResultados.classList.add('oculto');
+        mensajeRegistro.innerHTML = '';
+        mensajeEnvio.innerHTML = '';
+    }
+
+    function comenzarExamen() {
+        const nombre = inputNombre.value.trim();
+        const email = inputEmail.value.trim();
+        
+        if (!nombre || !email) {
+            mensajeRegistro.innerHTML = '<div class="mensaje-error">❌ Completa todos los campos</div>';
+            return;
+        }
+        if (!email.includes('@') || !email.includes('.')) {
+            mensajeRegistro.innerHTML = '<div class="mensaje-error">❌ Correo inválido</div>';
+            return;
+        }
+        
+        datosUsuario = { nombre, email };
+        panelRegistro.classList.add('oculto');
+        progresoContainer.classList.remove('oculto');
+        modoExamen.classList.remove('oculto');
+        renderizarPregunta();
+    }
+
+    // Event listeners
+    btnComenzar.addEventListener('click', comenzarExamen);
+
+    btnAnterior.addEventListener('click', () => {
+        guardarRespuestaActual();
+        if (preguntaActual > 0) {
+            preguntaActual--;
+            renderizarPregunta();
+        }
+    });
+
+    btnSiguiente.addEventListener('click', () => {
+        guardarRespuestaActual();
+        if (preguntaActual < 44) {
+            preguntaActual++;
+            renderizarPregunta();
+        }
+    });
+
+    btnFinalizar.addEventListener('click', mostrarResultados);
+    btnReiniciarExamen.addEventListener('click', reiniciarSimulacro);
+    btnNuevoIntento.addEventListener('click', reiniciarSimulacro);
+    btnFinalizarApp.addEventListener('click', () => alert('Simulador finalizado'));
+
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('input[type="radio"]')) {
+            respuestas[preguntaActual] = parseInt(e.target.value);
+            actualizarBarra();
+        }
+    });
+
+    // Inicializar
+    panelRegistro.classList.remove('oculto');
+    progresoContainer.classList.add('oculto');
+    modoExamen.classList.add('oculto');
+    panelResultados.classList.add('oculto');
+})();
+</script>
+</body>
+</html>
